@@ -104,7 +104,9 @@ tmp/
 temp/
 *.tmp
 
-# Learning materials (optional - remove if you want to keep them)
-# Learning Guide.txt
-# Copy Paste Ready Prompt to Cursor AI IDE.txt
+# Learning materials and personal notes (excluded from repo)
+Learning Guide.txt
+Copy Paste Ready Prompt to Cursor AI IDE.txt
+*.txt
+!README.md
 
