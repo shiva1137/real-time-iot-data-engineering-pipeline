@@ -1,0 +1,18 @@
+# Dockerfile for Data Generator
+# Topic 10: Docker Containerization
+
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY data_generator/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY data_generator/ ./data_generator/
+COPY .env .env
+
+# Run generator
+CMD ["python", "data_generator/generator.py"]
+

@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # MongoDB Service - Write Operations
+  # ============================================
+  mongodb:
+    image: mongo:7.0
+    container_name: iot_mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: iot_data
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - iot_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # PostgreSQL Service - Read Operations & Analytics
+  # ============================================
+  postgresql:
+    image: postgres:15-alpine
+    container_name: iot_postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: iot_analytics
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    networks:
+      - iot_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Kafka Service - Message Broker (KRaft Mode)
+  # ============================================
+  kafka:
+    image: apache/kafka:3.6.1
+    container_name: iot_kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+    volumes:
+      - kafka_data:/tmp/kraft-combined-logs
+    networks:
+      - iot_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - mongodb
+      - postgresql
+
+  # ============================================
+  # Kafka UI (Optional - for monitoring)
+  # ============================================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: iot_kafka_ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - iot_network
+    depends_on:
+      - kafka
+    restart: unless-stopped
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  iot_network:
+    driver: bridge
+    name: iot_network
+
+# ============================================
+# Volumes - Data Persistence
+# ============================================
+volumes:
+  mongodb_data:
+    name: iot_mongodb_data
+  mongodb_config:
+    name: iot_mongodb_config
+  postgresql_data:
+    name: iot_postgresql_data
+  kafka_data:
+    name: iot_kafka_data
+

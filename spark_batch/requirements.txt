@@ -1,0 +1,8 @@
+# Spark Batch Dependencies
+# Topic 4: Batch Processing with PySpark
+
+pyspark>=3.5.0
+psycopg2-binary>=2.9.9
+pandas>=2.0.0
+python-dotenv>=1.0.0
+

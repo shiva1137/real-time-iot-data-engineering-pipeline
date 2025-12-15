@@ -1,0 +1,261 @@
+# IoT Data Engineering Project
+
+A production-grade, interview-ready real-time data pipeline for IoT sensor data processing.
+
+## 📊 Project Overview
+
+This project processes **100 IoT sensors** generating data every **10 seconds**, resulting in approximately **864,000 readings per day**. The pipeline handles real-time streaming, batch processing, data quality validation, transformations, and API services.
+
+### Key Metrics
+- **Devices**: 100 IoT sensors
+- **Data Frequency**: Every 10 seconds
+- **Daily Volume**: ~864,000 readings/day
+- **Data Types**: Temperature, Humidity, Energy Consumption
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│   IoT Sensor Data (Faker Generator)                         │
+│   - Temperature, Humidity, Energy Consumption               │
+│   - 100 devices, every 10 seconds, continuous               │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+        ┌────────────────────────────┐
+        │   Kafka Topic: raw_iot     │
+        │   (Multi-partition)        │
+        └────────────┬───────────────┘
+                     │
+        ┌────────────┴──────────────┐
+        │                           │
+        ▼                           ▼
+┌──────────────────┐      ┌──────────────────┐
+│ SPARK STREAMING  │      │ SPARK BATCH      │
+│ (5-min windows)  │      │ (Daily job)      │
+│ - Aggregations   │      │ - Features       │
+│ - Late data      │      │ - Cleaning       │
+│ - Deduplication  │      │ - Aggregations   │
+└────────┬─────────┘      └────────┬─────────┘
+         │                         │
+         └────────────┬────────────┘
+                      │
+                      ▼
+        ┌─────────────────────────┐
+        │  Storage Layer          │
+        │  - MongoDB (Write)      │
+        │  - PostgreSQL (Read)    │
+        │  - raw_iot              │
+        │  - cleaned_iot          │
+        └────────────┬────────────┘
+                     │
+                     ▼
+        ┌─────────────────────────┐
+        │  dbt Transformations    │
+        │  - Staging              │
+        │  - Intermediate         │
+        │  - Marts (Analytics)    │
+        └────────────┬────────────┘
+                     │
+                     ▼
+        ┌─────────────────────────┐
+        │  Analytics DB           │
+        │  (PostgreSQL marts)     │
+        │  (Read operations)      │
+        └────────────┬────────────┘
+                     │
+        ┌────────────┼────────────┐
+        │            │            │
+        ▼            ▼            ▼
+    ┌────────┐ ┌─────────┐ ┌──────────┐
+    │ FastAPI│ │ Airflow │ │Monitoring│
+    │ REST   │ │Orchestr.│ │  Logs    │
+    │ API    │ │         │ │  Alerts  │
+    └────────┘ └─────────┘ └──────────┘
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- Python 3.9+
+- Git
+
+### Setup Instructions
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd "IOT Data Engineering Project"
+   ```
+
+2. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start infrastructure services**
+   ```bash
+   cd docker
+   docker-compose up -d
+   ```
+
+4. **Verify services are running**
+   ```bash
+   docker-compose ps
+   ```
+
+   You should see:
+   - MongoDB: `localhost:27017`
+   - PostgreSQL: `localhost:5432`
+   - Kafka: `localhost:9092`
+   - Kafka UI: `localhost:8080` (optional)
+
+5. **Initialize Kafka topics**
+   ```bash
+   cd ../kafka
+   bash init-topics.sh
+   ```
+
+6. **Run data generator** (Topic 2)
+   ```bash
+   cd ../data_generator
+   pip install -r requirements.txt
+   python generator.py
+   ```
+
+## 📁 Project Structure
+
+```
+├── data_generator/          # Topic 2: Faker data generator
+│   ├── __init__.py
+│   ├── generator.py
+│   └── requirements.txt
+│
+├── kafka/                   # Topic 2: Kafka configs
+│   ├── topics_config.json
+│   └── init-topics.sh
+│
+├── spark_streaming/         # Topic 3: Real-time processing
+│   ├── __init__.py
+│   ├── streaming_job.py
+│   └── requirements.txt
+│
+├── spark_batch/             # Topic 4: Daily batch jobs
+│   ├── __init__.py
+│   ├── batch_job.py
+│   └── requirements.txt
+│
+├── data_quality/            # Topic 5: Validation logic
+│   ├── __init__.py
+│   ├── validators.py
+│   └── requirements.txt
+│
+├── dbt/                     # Topic 6: dbt project
+│   ├── models/
+│   │   ├── staging/
+│   │   ├── intermediate/
+│   │   └── marts/
+│   ├── tests/
+│   ├── dbt_project.yml
+│   └── profiles.yml
+│
+├── api/                     # Topic 7: FastAPI
+│   ├── __init__.py
+│   ├── main.py
+│   ├── models/
+│   ├── routes/
+│   └── requirements.txt
+│
+├── airflow/                 # Topic 8: DAGs
+│   ├── dags/
+│   ├── logs/
+│   └── plugins/
+│
+├── monitoring/              # Topic 9: Logs, alerts
+│   ├── logging_config.py
+│   └── alerts.py
+│
+├── docker/                  # Topic 10: Dockerfiles
+│   ├── Dockerfile.generator
+│   ├── Dockerfile.spark
+│   ├── Dockerfile.api
+│   └── docker-compose.yml
+│
+├── .github/                 # Topic 11: CI/CD
+│   └── workflows/
+│       └── ci.yml
+│
+├── docs/                    # Documentation
+│   └── architecture.md
+│
+├── scripts/                 # Utility scripts
+│   └── setup.sh
+│
+├── tests/                   # Test files
+│   └── __init__.py
+│
+├── .gitignore
+├── .env.example
+├── requirements.txt
+└── README.md
+```
+
+## 🔧 Technology Stack
+
+- **Message Queue**: Apache Kafka (KRaft mode)
+- **Streaming**: Apache Spark Streaming
+- **Batch Processing**: Apache Spark (PySpark)
+- **Write Database**: MongoDB
+- **Read Database**: PostgreSQL
+- **Transformations**: dbt (Data Build Tool)
+- **API**: FastAPI
+- **Orchestration**: Apache Airflow
+- **Containerization**: Docker & Docker Compose
+
+## 📚 Topics Covered
+
+1. **Project Setup & Architecture** - Current topic
+2. **Data Ingestion with Kafka** - Producer, topics, partitioning
+3. **Real-Time Processing** - Spark Streaming, windowing, aggregations
+4. **Batch Processing** - Daily jobs, feature engineering
+5. **Data Quality** - Validation, schema enforcement
+6. **dbt Transformations** - Staging, intermediate, marts
+7. **FastAPI** - REST API for data access
+8. **Airflow Orchestration** - DAGs, scheduling
+9. **Monitoring & Logging** - Alerts, observability
+10. **Docker** - Containerization
+11. **CI/CD** - GitHub Actions
+12. **Production Deployment** - Best practices
+
+## 🎯 Interview Preparation
+
+This project is designed to answer common data engineering interview questions:
+
+- **Architecture**: "Walk me through your data pipeline architecture"
+- **Technology Choices**: "Why Kafka over RabbitMQ/Redis?"
+- **Data Flow**: "How does data flow through your system?"
+- **Scalability**: "How would you scale this pipeline?"
+- **Failure Handling**: "What happens if Kafka/MongoDB/PostgreSQL fails?"
+
+See [docs/architecture.md](docs/architecture.md) for detailed explanations.
+
+## 🤝 Contributing
+
+This is a learning project. Feel free to fork and experiment!
+
+## 📝 License
+
+This project is for educational purposes.
+
+## 🔗 Useful Links
+
+- Kafka UI: http://localhost:8080
+- FastAPI Docs: http://localhost:8000/docs (when running)
+- Airflow UI: http://localhost:8080/airflow (when running)
+
+---
+
+**Status**: 🚧 In Development - Topic 1 Complete
+

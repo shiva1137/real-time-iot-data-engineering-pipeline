@@ -1,0 +1,7 @@
+# Data Generator Dependencies
+# Topic 2: Data Ingestion with Kafka
+
+faker>=20.0.0
+kafka-python>=2.0.2
+python-dotenv>=1.0.0
+

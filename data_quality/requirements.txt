@@ -1,0 +1,7 @@
+# Data Quality Dependencies
+# Topic 5: Data Quality & Validation
+
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+# great-expectations>=0.18.0  # Optional for advanced validation
+

@@ -1,0 +1,73 @@
+# ============================================
+# IoT Data Engineering Project - Dependencies
+# ============================================
+# This is the root requirements.txt
+# Each module has its own requirements.txt for specific dependencies
+
+# ============================================
+# Core Dependencies
+# ============================================
+# Python version: 3.9+
+
+# ============================================
+# Data Generator (Topic 2)
+# ============================================
+# See: data_generator/requirements.txt
+# - faker
+# - kafka-python
+# - python-dotenv
+
+# ============================================
+# Spark Streaming (Topic 3)
+# ============================================
+# See: spark_streaming/requirements.txt
+# - pyspark
+# - pymongo
+# - psycopg2-binary
+# - kafka-python
+
+# ============================================
+# Spark Batch (Topic 4)
+# ============================================
+# See: spark_batch/requirements.txt
+# - pyspark
+# - psycopg2-binary
+# - pandas
+
+# ============================================
+# Data Quality (Topic 5)
+# ============================================
+# See: data_quality/requirements.txt
+# - pydantic
+# - great-expectations (optional)
+
+# ============================================
+# API (Topic 7)
+# ============================================
+# See: api/requirements.txt
+# - fastapi
+# - uvicorn
+# - sqlalchemy
+# - psycopg2-binary
+# - pydantic
+
+# ============================================
+# Monitoring (Topic 9)
+# ============================================
+# - python-logging
+# - python-dotenv
+
+# ============================================
+# Development Dependencies
+# ============================================
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.0.0
+
+# ============================================
+# Common Utilities
+# ============================================
+python-dotenv>=1.0.0
+

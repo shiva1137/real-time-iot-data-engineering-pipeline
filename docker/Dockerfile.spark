@@ -1,0 +1,20 @@
+# Dockerfile for Spark Jobs
+# Topic 10: Docker Containerization
+
+FROM apache/spark-py:3.5.0
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY spark_streaming/requirements.txt ./spark_streaming/
+COPY spark_batch/requirements.txt ./spark_batch/
+RUN pip install --no-cache-dir -r spark_streaming/requirements.txt -r spark_batch/requirements.txt
+
+# Copy application code
+COPY spark_streaming/ ./spark_streaming/
+COPY spark_batch/ ./spark_batch/
+COPY .env .env
+
+# Default command (override in docker-compose)
+CMD ["spark-submit", "--version"]
+

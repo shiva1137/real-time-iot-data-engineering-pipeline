@@ -1,0 +1,35 @@
+{
+  "topics": [
+    {
+      "name": "raw_iot",
+      "partitions": 6,
+      "replication_factor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      },
+      "description": "Raw IoT sensor data from data generator"
+    },
+    {
+      "name": "cleaned_iot",
+      "partitions": 6,
+      "replication_factor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      },
+      "description": "Cleaned and validated IoT sensor data"
+    },
+    {
+      "name": "aggregated_iot",
+      "partitions": 3,
+      "replication_factor": 1,
+      "config": {
+        "retention.ms": "2592000000",
+        "cleanup.policy": "delete"
+      },
+      "description": "Aggregated IoT data (5-minute windows)"
+    }
+  ]
+}
+
