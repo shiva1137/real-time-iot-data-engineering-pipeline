@@ -92,3 +92,19 @@ data/
 !**/requirements.txt
 !**/topics_config.json
 
+# Checkpoints
+checkpoints/
+*.checkpoint
+
+# Docker volumes data
+docker/volumes/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Learning materials (optional - remove if you want to keep them)
+# Learning Guide.txt
+# Copy Paste Ready Prompt to Cursor AI IDE.txt
+

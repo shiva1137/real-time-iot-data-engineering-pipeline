@@ -1,6 +1,6 @@
-# IoT Data Engineering Project
+# Real-Time IoT Data Engineering Pipeline: Streaming Data Processing & Analytics
 
-A production-grade, interview-ready real-time data pipeline for IoT sensor data processing.
+A production-grade, interview-ready real-time data pipeline for IoT sensor data processing. This project demonstrates end-to-end data engineering practices from ingestion to serving analytics via REST API.
 
 ## 📊 Project Overview
 
@@ -216,18 +216,69 @@ This project processes **100 IoT sensors** generating data every **10 seconds**,
 
 ## 📚 Topics Covered
 
-1. **Project Setup & Architecture** - Current topic
-2. **Data Ingestion with Kafka** - Producer, topics, partitioning
-3. **Real-Time Processing** - Spark Streaming, windowing, aggregations
-4. **Batch Processing** - Daily jobs, feature engineering
-5. **Data Quality** - Validation, schema enforcement
-6. **dbt Transformations** - Staging, intermediate, marts
-7. **FastAPI** - REST API for data access
-8. **Airflow Orchestration** - DAGs, scheduling
-9. **Monitoring & Logging** - Alerts, observability
-10. **Docker** - Containerization
-11. **CI/CD** - GitHub Actions
-12. **Production Deployment** - Best practices
+### ✅ Completed Topics
+
+1. **✅ Project Setup & Architecture** - Complete
+   - Complete folder structure following best practices
+   - Docker Compose setup with MongoDB, PostgreSQL, Kafka (KRaft)
+   - Comprehensive documentation and architecture diagrams
+   - Git repository initialization
+   - CI/CD pipeline setup
+
+### 🚧 In Progress / Upcoming Topics
+
+2. **Data Ingestion with Kafka** - Upcoming
+   - Producer implementation, topics, partitioning
+   - Faker data generator for realistic IoT data
+   - Error handling and retries
+
+3. **Real-Time Processing** - Upcoming
+   - Spark Streaming, windowing, aggregations
+   - Late data handling with watermarking
+   - State management
+
+4. **Batch Processing** - Upcoming
+   - Daily jobs, feature engineering
+   - Data cleaning and transformations
+
+5. **Data Quality** - Upcoming
+   - Validation, schema enforcement
+   - Dead-letter queue (DLQ) pattern
+
+6. **dbt Transformations** - Upcoming
+   - Staging, intermediate, marts
+   - SQL-based transformations
+
+7. **FastAPI** - Upcoming
+   - REST API for data access
+   - Pydantic validation
+
+8. **Airflow Orchestration** - Upcoming
+   - DAGs, scheduling
+   - Workflow management
+
+9. **Monitoring & Logging** - Upcoming
+   - Alerts, observability
+   - Structured logging
+
+10. **Docker** - Upcoming
+    - Containerization
+    - Multi-stage builds
+
+11. **CI/CD** - Upcoming
+    - GitHub Actions
+    - Automated testing
+
+12. **Production Deployment** - Upcoming
+    - Best practices
+    - Performance optimization
+
+## 📊 Project Progress
+
+**Overall Progress: 1/12 Topics (8%)**
+
+- ✅ Topic 1: Project Setup & Architecture
+- ⏳ Topic 2-12: In Development
 
 ## 🎯 Interview Preparation
 
@@ -257,5 +308,28 @@ This project is for educational purposes.
 
 ---
 
-**Status**: 🚧 In Development - Topic 1 Complete
+## 🎯 Project Status
+
+**Current Status**: ✅ Topic 1 Complete | 🚧 Topics 2-12 In Development
+
+**Last Updated**: December 2024
+
+**Repository**: [GitHub - Real-Time IoT Data Engineering Pipeline](https://github.com/yourusername/real-time-iot-data-engineering-pipeline)
+
+---
+
+## 📈 Learning Journey
+
+This project is part of a structured learning path to master data engineering concepts through hands-on implementation. Each topic builds upon the previous one, creating a complete, production-ready pipeline.
+
+**Key Achievements So Far:**
+- ✅ Production-grade project structure
+- ✅ Docker infrastructure setup
+- ✅ Comprehensive architecture documentation
+- ✅ Interview-ready explanations and Q&A
+
+**Next Milestones:**
+- 🎯 Topic 2: Implement Kafka producer and data generator
+- 🎯 Topic 3: Build Spark Streaming pipeline
+- 🎯 Topic 4: Create batch processing jobs
 
