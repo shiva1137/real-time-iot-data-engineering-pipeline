@@ -11,4 +11,3 @@ Usage:
 
 # Placeholder - Will be implemented in Topic 3
 pass
-

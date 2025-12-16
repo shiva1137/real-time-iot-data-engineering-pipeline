@@ -312,9 +312,9 @@ This project is for educational purposes.
 
 **Current Status**: ✅ Topic 1 Complete | 🚧 Topics 2-12 In Development
 
-**Last Updated**: December 2024
+**Last Updated**: December 2025
 
-**Repository**: [GitHub - Real-Time IoT Data Engineering Pipeline](https://github.com/yourusername/real-time-iot-data-engineering-pipeline)
+**Repository**: [GitHub - Real-Time IoT Data Engineering Pipeline](https://github.com/shiva1137/real-time-iot-data-engineering-pipeline)
 
 ---
 
