@@ -8,3 +8,4 @@ Topic 5: Data Quality & Validation
 """
 
 __version__ = "1.0.0"
+

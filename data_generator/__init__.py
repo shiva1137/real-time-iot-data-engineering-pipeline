@@ -8,3 +8,4 @@ Topic 2: Data Ingestion with Kafka
 """
 
 __version__ = "1.0.0"
+
