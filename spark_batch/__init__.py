@@ -8,4 +8,3 @@ Topic 4: Batch Processing with PySpark
 """
 
 __version__ = "1.0.0"
-
