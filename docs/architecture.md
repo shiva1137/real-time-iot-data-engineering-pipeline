@@ -103,7 +103,7 @@
 - **Why Separate**: Infrastructure configuration separate from application code
 - **Key Files**:
   - `topics_config.json`: Topic definitions (partitions, replication)
-  - `init-topics.sh`: Script to create topics on startup
+  - `init_topics.py`: Python script to create topics (production-ready)
 
 #### `spark_streaming/`
 - **Purpose**: Real-time data processing with Spark Streaming

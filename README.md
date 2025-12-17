@@ -114,28 +114,46 @@ This project processes **100 IoT sensors** generating data every **10 seconds**,
 
 5. **Initialize Kafka topics**
    ```bash
-   cd ../kafka
-   bash init-topics.sh
+   # Install dependencies
+   cd kafka
+   pip install -r requirements.txt
+   
+   # Initialize topics
+   python init_topics.py
+   
+   # Or verify topics exist:
+   docker exec -it iot_kafka kafka-topics.sh --list --bootstrap-server localhost:9092
    ```
 
-6. **Run data generator** (Topic 2)
+6. **Run data generator and producer** (Topic 2)
    ```bash
    cd ../data_generator
    pip install -r requirements.txt
-   python generator.py
+   python producer.py
    ```
+
+7. **Run validation consumer** (in separate terminal)
+   ```bash
+   cd ../data_quality
+   pip install -r requirements.txt
+   python validation_consumer.py
+   ```
+
+See [docs/topic2_usage_guide.md](docs/topic2_usage_guide.md) for detailed usage instructions.
 
 ## 📁 Project Structure
 
 ```
-├── data_generator/          # Topic 2: Faker data generator
+├── data_generator/          # Topic 2: Faker data generator + Kafka producer
 │   ├── __init__.py
-│   ├── generator.py
+│   ├── generator.py         # India-based data generator with quality issues
+│   ├── producer.py          # Idempotent Kafka producer
 │   └── requirements.txt
 │
 ├── kafka/                   # Topic 2: Kafka configs
 │   ├── topics_config.json
-│   └── init-topics.sh
+│   ├── init_topics.py       # Topic initialization script (Python)
+│   └── requirements.txt
 │
 ├── spark_streaming/         # Topic 3: Real-time processing
 │   ├── __init__.py
@@ -147,9 +165,10 @@ This project processes **100 IoT sensors** generating data every **10 seconds**,
 │   ├── batch_job.py
 │   └── requirements.txt
 │
-├── data_quality/            # Topic 5: Validation logic
+├── data_quality/            # Topic 2 & 5: Validation logic
 │   ├── __init__.py
-│   ├── validators.py
+│   ├── validators.py       # Validation functions (Topic 5)
+│   ├── validation_consumer.py  # Kafka validation consumer (Topic 2)
 │   └── requirements.txt
 │
 ├── dbt/                     # Topic 6: dbt project
@@ -188,10 +207,13 @@ This project processes **100 IoT sensors** generating data every **10 seconds**,
 │       └── ci.yml
 │
 ├── docs/                    # Documentation
-│   └── architecture.md
+│   ├── architecture.md      # System architecture
+│   ├── topic1_comprehensive_guide.md  # Topic 1: Complete guide
+│   ├── topic2_comprehensive_guide.md  # Topic 2: Complete guide
+│   └── topic2_usage_guide.md          # Topic 2: Usage guide
 │
 ├── scripts/                 # Utility scripts
-│   └── setup.sh
+│   └── setup.py             # Project setup script (Python, uses stdlib only)
 │
 ├── tests/                   # Test files
 │   └── __init__.py
@@ -225,12 +247,21 @@ This project processes **100 IoT sensors** generating data every **10 seconds**,
    - Git repository initialization
    - CI/CD pipeline setup
 
-### 🚧 In Progress / Upcoming Topics
+2. **✅ Data Ingestion with Kafka** - Complete
+   - Kafka broker setup in KRaft mode (no Zookeeper)
+   - India-based Faker data generator (100 sensors across major cities)
+   - Comprehensive data quality issues (nulls, duplicates, late data, out-of-range, type mismatches, schema violations, formatting)
+   - Idempotent Kafka producer (MVP - clean, focused implementation)
+     - Schema validation (lightweight checks)
+     - Retry logic with exponential backoff (5 retries max)
+     - Partition hashing for ordering per sensor
+     - Thread-safe statistics tracking
+   - Validation consumer with comprehensive quality checks
+   - Dead-letter queue (DLQ) for invalid data
+   - Quality metrics tracking
+   - Interview preparation documentation
 
-2. **Data Ingestion with Kafka** - Upcoming
-   - Producer implementation, topics, partitioning
-   - Faker data generator for realistic IoT data
-   - Error handling and retries
+### 🚧 In Progress / Upcoming Topics
 
 3. **Real-Time Processing** - Upcoming
    - Spark Streaming, windowing, aggregations
@@ -275,10 +306,11 @@ This project processes **100 IoT sensors** generating data every **10 seconds**,
 
 ## 📊 Project Progress
 
-**Overall Progress: 1/12 Topics (8%)**
+**Overall Progress: 2/12 Topics (17%)**
 
 - ✅ Topic 1: Project Setup & Architecture
-- ⏳ Topic 2-12: In Development
+- ✅ Topic 2: Data Ingestion with Kafka
+- ⏳ Topic 3-12: In Development
 
 ## 🎯 Interview Preparation
 
@@ -290,7 +322,11 @@ This project is designed to answer common data engineering interview questions:
 - **Scalability**: "How would you scale this pipeline?"
 - **Failure Handling**: "What happens if Kafka/MongoDB/PostgreSQL fails?"
 
-See [docs/architecture.md](docs/architecture.md) for detailed explanations.
+**Comprehensive Documentation:**
+- [Topic 1 Comprehensive Guide](docs/topic1_comprehensive_guide.md) - Project setup & architecture
+- [Topic 2 Comprehensive Guide](docs/topic2_comprehensive_guide.md) - Data ingestion with Kafka
+- [Topic 2 Usage Guide](docs/topic2_usage_guide.md) - Practical setup & usage
+- [Architecture Documentation](docs/architecture.md) - System design & decisions
 
 ## 🤝 Contributing
 
@@ -310,9 +346,9 @@ This project is for educational purposes.
 
 ## 🎯 Project Status
 
-**Current Status**: ✅ Topic 1 Complete | 🚧 Topics 2-12 In Development
+**Current Status**: ✅ Topics 1-2 Complete | 🚧 Topics 3-12 In Development
 
-**Last Updated**: December 2025
+**Last Updated**: January 2025
 
 **Repository**: [GitHub - Real-Time IoT Data Engineering Pipeline](https://github.com/shiva1137/real-time-iot-data-engineering-pipeline)
 
@@ -326,10 +362,14 @@ This project is part of a structured learning path to master data engineering co
 - ✅ Production-grade project structure
 - ✅ Docker infrastructure setup
 - ✅ Comprehensive architecture documentation
+- ✅ Kafka broker in KRaft mode
+- ✅ India-based data generator with comprehensive quality issues
+- ✅ Idempotent Kafka producer with error handling
+- ✅ Validation consumer with DLQ pattern
 - ✅ Interview-ready explanations and Q&A
 
 **Next Milestones:**
-- 🎯 Topic 2: Implement Kafka producer and data generator
-- 🎯 Topic 3: Build Spark Streaming pipeline
+- 🎯 Topic 3: Build Spark Streaming pipeline (consumes from validated_iot_data)
 - 🎯 Topic 4: Create batch processing jobs
+- 🎯 Topic 5: Enhanced data quality validation
 

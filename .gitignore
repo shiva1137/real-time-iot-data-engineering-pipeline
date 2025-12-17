@@ -62,6 +62,7 @@ logs/
 airflow/logs/
 airflow/airflow.db
 airflow/airflow-webserver.pid
+airflow/__pycache__/
 
 # Spark
 spark-warehouse/
@@ -72,6 +73,7 @@ derby.log
 dbt/target/
 dbt/logs/
 dbt/.dbt/
+dbt/__pycache__/
 
 # Testing
 .pytest_cache/
@@ -105,8 +107,9 @@ temp/
 *.tmp
 
 # Learning materials and personal notes (excluded from repo)
-Learning Guide.txt
+# Note: Learning Guide.txt is kept in repo as it's part of the project documentation
 Copy Paste Ready Prompt to Cursor AI IDE.txt
 *.txt
 !README.md
+!Learning Guide.txt
 

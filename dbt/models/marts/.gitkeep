@@ -1,3 +1,2 @@
-# Marts (analytics) models will be created here
-# Topic 6: dbt Transformations
-
+# This file ensures the marts directory is tracked by git
+# dbt marts models will be added here in Topic 6

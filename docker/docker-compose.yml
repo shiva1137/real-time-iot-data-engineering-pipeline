@@ -56,6 +56,7 @@ services:
       - "9092:9092"
       - "9093:9093"
     environment:
+      # KRaft Mode Configuration (No Zookeeper)
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -65,12 +66,16 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      # Replication settings for single-node cluster
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      # Disable auto-create to use init script
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
     volumes:
       - kafka_data:/tmp/kraft-combined-logs
+      # Note: Python init script can be run manually or via entrypoint
+      # Volume mount removed - use: docker exec -it iot_kafka python3 /path/to/init_topics.py
     networks:
       - iot_network
     restart: unless-stopped
@@ -79,9 +84,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 60s  # Give Kafka 60s to start before checking health
     depends_on:
-      - mongodb
-      - postgresql
+      mongodb:
+        condition: service_healthy
+      postgresql:
+        condition: service_healthy
 
   # ============================================
   # Kafka UI (Optional - for monitoring)
@@ -96,9 +104,75 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     networks:
       - iot_network
-    depends_on:
-      - kafka
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s  # Give Kafka UI 30s to start
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # ============================================
+  # Prometheus - Metrics Collection
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: iot_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - iot_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s  # Give Prometheus 15s to start
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # ============================================
+  # Grafana - Metrics Visualization
+  # ============================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: iot_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - iot_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s  # Give Grafana 30s to start
+    depends_on:
+      prometheus:
+        condition: service_healthy
 
 # ============================================
 # Networks
@@ -120,4 +194,8 @@ volumes:
     name: iot_postgresql_data
   kafka_data:
     name: iot_kafka_data
+  prometheus_data:
+    name: iot_prometheus_data
+  grafana_data:
+    name: iot_grafana_data
 

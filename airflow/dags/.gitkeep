@@ -1,3 +1,2 @@
-# Airflow DAGs will be created here
-# Topic 8: Airflow Orchestration
-
+# This file ensures the dags directory is tracked by git
+# Airflow DAGs will be added here in Topic 8

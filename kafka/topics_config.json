@@ -1,34 +1,44 @@
 {
   "topics": [
     {
-      "name": "raw_iot",
-      "partitions": 6,
-      "replication_factor": 1,
-      "config": {
-        "retention.ms": "604800000",
-        "cleanup.policy": "delete"
-      },
-      "description": "Raw IoT sensor data from data generator"
-    },
-    {
-      "name": "cleaned_iot",
-      "partitions": 6,
-      "replication_factor": 1,
-      "config": {
-        "retention.ms": "604800000",
-        "cleanup.policy": "delete"
-      },
-      "description": "Cleaned and validated IoT sensor data"
-    },
-    {
-      "name": "aggregated_iot",
+      "name": "raw_iot_data",
       "partitions": 3,
       "replication_factor": 1,
       "config": {
-        "retention.ms": "2592000000",
+        "retention.ms": "604800000",
         "cleanup.policy": "delete"
       },
-      "description": "Aggregated IoT data (5-minute windows)"
+      "description": "Raw IoT sensor data from data generator (before validation)"
+    },
+    {
+      "name": "validated_iot_data",
+      "partitions": 3,
+      "replication_factor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      },
+      "description": "Validated and cleaned IoT sensor data (after quality checks)"
+    },
+    {
+      "name": "dlq_iot_data",
+      "partitions": 1,
+      "replication_factor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      },
+      "description": "Dead-letter queue for invalid IoT sensor data (failed validation)"
+    },
+    {
+      "name": "dlq_raw_iot_data",
+      "partitions": 1,
+      "replication_factor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "cleanup.policy": "delete"
+      },
+      "description": "Dead-letter queue for raw IoT data that failed to send to raw_iot_data topic (7 days retention)"
     }
   ]
 }

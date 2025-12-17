@@ -1,3 +1,2 @@
-# dbt tests will be created here
-# Topic 6: dbt Transformations
-
+# This file ensures the tests directory is tracked by git
+# dbt tests will be added here in Topic 6

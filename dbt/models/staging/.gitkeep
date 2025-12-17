@@ -1,3 +1,2 @@
-# Staging models will be created here
-# Topic 6: dbt Transformations
-
+# This file ensures the staging directory is tracked by git
+# dbt staging models will be added here in Topic 6
