@@ -35,22 +35,14 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
-
-try:
-    from kafka import KafkaAdminClient
-    from kafka.admin import NewTopic, ConfigResource, ConfigResourceType
-    from kafka.errors import (
-        KafkaError,
-        TopicAlreadyExistsError,
-        KafkaTimeoutError,
-        NodeNotReadyError,
-    )
-except ImportError:
-    print(
-        "Error: kafka-python library is required. Install it with: pip install kafka-python>=2.0.2",
-        file=sys.stderr,
-    )
-    sys.exit(1)
+from kafka import KafkaAdminClient
+from kafka.admin import NewTopic, ConfigResource, ConfigResourceType
+from kafka.errors import (
+    KafkaError,
+    TopicAlreadyExistsError,
+    KafkaTimeoutError,
+    NodeNotReadyError,
+)
 
 # Configure logging
 logging.basicConfig(

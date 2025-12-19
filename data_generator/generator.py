@@ -288,9 +288,6 @@ def introduce_late_data(record: Dict[str, Any]) -> Dict[str, Any]:
             record["timestamp"] = (datetime.now(ZoneInfo('Asia/Kolkata')) - timedelta(minutes=random.randint(15, 60))).isoformat()
             _quality_issue_stats["late_data"] += 1
             
-        elif rand < 0.105:  # 0.5% - Future timestamp
-            record["timestamp"] = (datetime.now(ZoneInfo('Asia/Kolkata')) + timedelta(minutes=random.randint(1, 10))).isoformat()
-            _quality_issue_stats["late_data"] += 1
     
     return record
 

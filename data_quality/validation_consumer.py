@@ -33,6 +33,7 @@ from collections import defaultdict
 from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import KafkaError
 from dotenv import load_dotenv
+from zoneinfo import ZoneInfo
 
 # Load environment variables
 load_dotenv()
@@ -577,7 +578,7 @@ def process_message(
             )
         
         # Update last processed timestamp
-        _validation_metrics["last_processed_timestamp"] = datetime.utcnow().isoformat()
+        _validation_metrics["last_processed_timestamp"] = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
         
         return True
         
