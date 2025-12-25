@@ -88,7 +88,7 @@ _indexes_created = False
 _index_lock = threading.Lock()
 
 # Retry configuration (using tenacity)
-MAX_RETRY_DURATION = 86400  # 24 hours (or use float('inf') for infinite)
+MAX_RETRY_DURATION = float('inf') # 24 hours (or use float('inf') for infinite)
 INITIAL_RETRY_WAIT = 2  # Start with 2 seconds
 MAX_RETRY_WAIT = 300  # Max 5 minutes between retries
 

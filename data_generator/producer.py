@@ -308,7 +308,6 @@ def send_to_kafka(
     retry=retry_if_exception_type((KafkaTimeoutError, KafkaError)),
     before_sleep=before_sleep_log(logger, logging.INFO),
     after=after_log(logger, logging.WARNING),
-    reraise=True
 )
 def send_with_retry(
     producer: KafkaProducer,
