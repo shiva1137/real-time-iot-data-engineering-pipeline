@@ -35,6 +35,14 @@ from zoneinfo import ZoneInfo
 from typing import Dict, Any, Optional, Tuple
 from kafka import KafkaProducer
 from kafka.errors import KafkaError, KafkaTimeoutError
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+    before_sleep_log,
+    after_log
+)
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -245,12 +253,12 @@ def send_to_kafka(
     topic: str,
     num_partitions: int = 3,
     timeout: int = 10
-) -> bool:
+):
     """
-    Send message to Kafka (single attempt, no retry).
+    Send message to Kafka (single attempt, raises exception on failure).
     
     This function makes one attempt to send. Retry logic is handled
-    in send_with_retry().
+    by tenacity decorator in send_with_retry().
     
     Args:
         producer: KafkaProducer instance
@@ -260,60 +268,64 @@ def send_to_kafka(
         timeout: Timeout in seconds
         
     Returns:
-        True if sent successfully, False otherwise
+        RecordMetadata if sent successfully
+        
+    Raises:
+        KafkaError: If send fails
+        KafkaTimeoutError: If send times out
     """
     sensor_id = record.get("sensor_id", "unknown")
     message_id = record.get("message_id", "unknown")
     
-    try:
-        # Get partition for sensor_id (ensures ordering per sensor)
-        partition = get_partition(sensor_id, num_partitions)
-        
-        # Send to Kafka
-        future = producer.send(
-            topic=topic,
-            key=sensor_id,  # Partition key
-            value=record,
-            partition=partition  # Explicit partition
-        )
-        
-        # Wait for acknowledgment (with timeout)
-        record_metadata = future.get(timeout=timeout)
-        
-        logger.debug(
-            f"Message sent successfully: "
-            f"topic={record_metadata.topic}, "
-            f"partition={record_metadata.partition}, "
-            f"offset={record_metadata.offset}, "
-            f"sensor_id={sensor_id}, "
-            f"message_id={message_id}"
-        )
-        return True
-        
-    except (KafkaTimeoutError, KafkaError) as e:
-        logger.debug(f"Failed to send message to {topic}: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error sending message to {topic}: {e}")
-        return False
+    # Get partition for sensor_id (ensures ordering per sensor)
+    partition = get_partition(sensor_id, num_partitions)
+    
+    # Send to Kafka
+    future = producer.send(
+        topic=topic,
+        key=sensor_id,  # Partition key
+        value=record,
+        partition=partition  # Explicit partition
+    )
+    
+    # Wait for acknowledgment (with timeout)
+    record_metadata = future.get(timeout=timeout)
+    
+    logger.debug(
+        f"Message sent successfully: "
+        f"topic={record_metadata.topic}, "
+        f"partition={record_metadata.partition}, "
+        f"offset={record_metadata.offset}, "
+        f"sensor_id={sensor_id}, "
+        f"message_id={message_id}"
+    )
+    return record_metadata
 
 
+@retry(
+    stop=stop_after_attempt(5),  # Retry up to 5 times
+    wait=wait_exponential(multiplier=1, min=1, max=16),  # 1s, 2s, 4s, 8s, 16s
+    retry=retry_if_exception_type((KafkaTimeoutError, KafkaError)),
+    before_sleep=before_sleep_log(logger, logging.INFO),
+    after=after_log(logger, logging.WARNING),
+    reraise=True
+)
 def send_with_retry(
     producer: KafkaProducer,
     record: Dict[str, Any],
     topic: str,
-    num_partitions: int = 3,
-    max_retries: int = 5,
-    retry_count: int = 0
+    num_partitions: int = 3
 ) -> bool:
     """
-    Send message to Kafka with exponential backoff retry.
+    Send message to Kafka with automatic retry using tenacity.
     
-    Strategy (MVP):
-    - Try up to 5 times (max_retries=5)
+    Uses tenacity for clean, declarative retry logic.
+    Automatically retries on Kafka errors with exponential backoff.
+    
+    Strategy:
+    - Try up to 5 times
     - Exponential backoff: 1s → 2s → 4s → 8s → 16s
-    - On final failure: Log error and return False
-    - No DLQ, no local queue (add in Phase 3)
+    - On final failure: Returns False (doesn't raise)
     
     Why 5 retries?
     - Handles transient network issues
@@ -326,41 +338,24 @@ def send_with_retry(
         record: Message record to send
         topic: Target Kafka topic
         num_partitions: Number of partitions
-        max_retries: Maximum number of retries (default: 5)
-        retry_count: Current retry attempt (internal use)
         
     Returns:
         True if sent successfully, False otherwise
     """
     sensor_id = record.get("sensor_id", "unknown")
     
-    # Try to send
-    success = send_to_kafka(producer, record, topic, num_partitions)
-    
-    if success:
+    try:
+        # Try to send (will retry automatically on exception)
+        send_to_kafka(producer, record, topic, num_partitions)
         increment_stat("messages_sent")
         return True
-    
-    # Retry logic
-    if retry_count < max_retries:
-        # Exponential backoff: 1s, 2s, 4s, 8s, 16s
-        wait_time = 1 * (2 ** retry_count)
-        logger.info(
-            f"Retrying message to {topic} (attempt {retry_count + 1}/{max_retries}) "
-            f"after {wait_time}s: sensor_id={sensor_id}"
+    except (KafkaTimeoutError, KafkaError) as e:
+        # After all retries exhausted, log and return False
+        logger.warning(
+            f"Max retries exceeded for {topic}: sensor_id={sensor_id}, error={e}"
         )
-        increment_stat("retries")
-        time.sleep(wait_time)
-        return send_with_retry(
-            producer, record, topic, num_partitions, max_retries, retry_count + 1
-        )
-    
-    # Max retries exceeded - fail and log
-    logger.warning(
-        f"Max retries ({max_retries}) exceeded for {topic}: sensor_id={sensor_id}"
-    )
-    increment_stat("messages_failed")
-    return False
+        increment_stat("messages_failed")
+        return False
 
 
 def send_record(
@@ -406,8 +401,8 @@ def send_record(
         increment_stat("messages_failed")
         return False
     
-    # Step 2: Send with retry logic (5 retries, exponential backoff)
-    return send_with_retry(producer, record, topic, num_partitions, max_retries=5)
+    # Step 2: Send with retry logic (automatic retry with tenacity, up to 5 attempts)
+    return send_with_retry(producer, record, topic, num_partitions)
 
 
 def flush_producer(producer: KafkaProducer):

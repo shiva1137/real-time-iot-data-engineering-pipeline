@@ -43,6 +43,14 @@ from kafka.errors import (
     KafkaTimeoutError,
     NodeNotReadyError,
 )
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_fixed,
+    retry_if_exception_type,
+    before_sleep_log,
+    after_log
+)
 
 # Configure logging
 logging.basicConfig(
@@ -95,48 +103,70 @@ def load_config(config_file: Path) -> Dict:
     return config
 
 
+@retry(
+    stop=stop_after_attempt(MAX_RETRIES),
+    wait=wait_fixed(RETRY_INTERVAL),
+    retry=retry_if_exception_type((KafkaError, KafkaTimeoutError, NodeNotReadyError)),
+    before_sleep=before_sleep_log(logger, logging.DEBUG),
+    after=after_log(logger, logging.ERROR),
+    reraise=True
+)
+def _check_kafka_connection(bootstrap_servers: str):
+    """
+    Check if Kafka is ready by attempting to connect.
+    
+    This function is wrapped with tenacity retry decorator.
+    Raises exception if Kafka is not ready (will be retried).
+    
+    Args:
+        bootstrap_servers: Kafka broker address
+        
+    Raises:
+        KafkaError: If Kafka is not ready
+        KafkaTimeoutError: If connection times out
+        NodeNotReadyError: If Kafka node is not ready
+    """
+    # Try to create admin client and list topics (lightweight operation)
+    admin_client = KafkaAdminClient(
+        bootstrap_servers=bootstrap_servers,
+        client_id="kafka_init_check",
+        request_timeout_ms=5000,
+    )
+    # Try to get cluster metadata (this will fail if Kafka is not ready)
+    admin_client.list_topics()
+    admin_client.close()
+
+
 def wait_for_kafka(
     bootstrap_servers: str, max_retries: int = MAX_RETRIES, retry_interval: int = RETRY_INTERVAL
 ) -> bool:
     """
-    Wait for Kafka to be ready by attempting to connect.
+    Wait for Kafka to be ready by attempting to connect with automatic retry.
+
+    Uses tenacity for clean, declarative retry logic.
+    Automatically retries on Kafka connection errors.
 
     Args:
         bootstrap_servers: Kafka broker address
-        max_retries: Maximum number of retry attempts
-        retry_interval: Seconds to wait between retries
+        max_retries: Maximum number of retry attempts (default: MAX_RETRIES)
+        retry_interval: Seconds to wait between retries (default: RETRY_INTERVAL)
 
     Returns:
         True if Kafka is ready, False otherwise
     """
     logger.info("Waiting for Kafka to be ready...")
 
-    for attempt in range(1, max_retries + 1):
-        try:
-            # Try to create admin client and list topics (lightweight operation)
-            admin_client = KafkaAdminClient(
-                bootstrap_servers=bootstrap_servers,
-                client_id="kafka_init_check",
-                request_timeout_ms=5000,
-            )
-            # Try to get cluster metadata (this will fail if Kafka is not ready)
-            admin_client.list_topics()
-            admin_client.close()
-            logger.info("Kafka is ready!")
-            return True
-        except (KafkaError, KafkaTimeoutError, NodeNotReadyError) as e:
-            if attempt < max_retries:
-                logger.debug(f"Kafka not ready yet (attempt {attempt}/{max_retries}): {e}")
-                logger.info(f"Waiting... ({attempt}/{max_retries})")
-                time.sleep(retry_interval)
-            else:
-                logger.error(f"Kafka not ready after {max_retries} attempts")
-                return False
-        except Exception as e:
-            logger.error(f"Unexpected error checking Kafka: {e}")
-            return False
-
-    return False
+    try:
+        # This will automatically retry on exceptions
+        _check_kafka_connection(bootstrap_servers)
+        logger.info("Kafka is ready!")
+        return True
+    except (KafkaError, KafkaTimeoutError, NodeNotReadyError) as e:
+        logger.error(f"Kafka not ready after {max_retries} attempts: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error checking Kafka: {e}")
+        return False
 
 
 def create_topic_config(topic_config: Dict) -> Dict[str, str]:
