@@ -1,0 +1,15 @@
+# Dockerfile.airflow (Topic 10)
+# Base: Apache Airflow image; add DAGs and dependencies.
+FROM apache/airflow:2.7.0-python3.11
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+USER airflow
+COPY requirements-airflow.txt /opt/airflow/requirements-airflow.txt
+RUN pip install --no-cache-dir -r /opt/airflow/requirements-airflow.txt
+# DAGs and dbt project mounted via docker-compose
+ENV AIRFLOW__CORE__LOAD_EXAMPLES=false
+ENV AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgresql:5432/airflow
+ENV AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgresql:5432/airflow
+ENV AIRFLOW__CORE__EXECUTOR=LocalExecutor

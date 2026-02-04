@@ -261,56 +261,47 @@ See [docs/topic2_usage_guide.md](docs/topic2_usage_guide.md) for detailed usage 
    - Quality metrics tracking
    - Interview preparation documentation
 
-### 🚧 In Progress / Upcoming Topics
+3. **✅ Real-Time Processing** - Complete
+   - Spark Streaming from validated_iot_data, 5-min tumbling windows
+   - Watermarking (1 min), UPDATE mode, checkpointing, MongoDB writes
+   - Mongo-to-PostgreSQL sync job (every 5 min)
 
-3. **Real-Time Processing** - Upcoming
-   - Spark Streaming, windowing, aggregations
-   - Late data handling with watermarking
-   - State management
+4. **✅ Batch Processing** - Complete
+   - Daily batch: read PostgreSQL real_time_aggregates, clean, hourly aggregation
+   - Feature engineering: anomaly flags, stddev; write to processed_daily (PostgreSQL + MongoDB)
 
-4. **Batch Processing** - Upcoming
-   - Daily jobs, feature engineering
-   - Data cleaning and transformations
+5. **✅ Data Quality** - Complete
+   - validators.py: schema, range, format, freshness, completeness, duplicates
+   - Validation consumer routes to validated_iot_data / dlq_iot_data; quality metrics
 
-5. **Data Quality** - Upcoming
-   - Validation, schema enforcement
-   - Dead-letter queue (DLQ) pattern
+6. **✅ dbt Transformations** - Complete
+   - Staging (stg_iot_readings), intermediate (int_iot_with_features), marts (daily, hourly, location_stats)
+   - Tests and sources from public.processed_daily
 
-6. **dbt Transformations** - Upcoming
-   - Staging, intermediate, marts
-   - SQL-based transformations
+7. **✅ FastAPI** - Complete
+   - GET /sensors, GET /sensors/{id}/analytics, GET /health
+   - Pydantic models, connection pooling, error handling
 
-7. **FastAPI** - Upcoming
-   - REST API for data access
-   - Pydantic validation
+8. **✅ Airflow Orchestration** - Complete
+   - ingestion_validation_dag (every 10 min), batch_processing_dag (daily 02:00), transformation_dag (daily 03:00)
 
-8. **Airflow Orchestration** - Upcoming
-   - DAGs, scheduling
-   - Workflow management
+9. **✅ Monitoring & Logging** - Complete
+   - Structured JSON logging (logging_config.py), threshold alerts (alerts.py), health endpoint
 
-9. **Monitoring & Logging** - Upcoming
-   - Alerts, observability
-   - Structured logging
+10. **✅ Docker** - Complete
+    - Dockerfiles: api, generator, spark; Dockerfile.airflow; docker-compose with health checks
 
-10. **Docker** - Upcoming
-    - Containerization
-    - Multi-stage builds
+11. **✅ CI/CD** - Complete
+    - Lint, test, security (pip-audit), Docker build in GitHub Actions
 
-11. **CI/CD** - Upcoming
-    - GitHub Actions
-    - Automated testing
-
-12. **Production Deployment** - Upcoming
-    - Best practices
-    - Performance optimization
+12. **✅ Production Walkthrough** - Documented
+    - Architecture, failure handling, and topic summaries in docs/
 
 ## 📊 Project Progress
 
-**Overall Progress: 2/12 Topics (17%)**
+**Overall Progress: 12/12 Topics (100%)**
 
-- ✅ Topic 1: Project Setup & Architecture
-- ✅ Topic 2: Data Ingestion with Kafka
-- ⏳ Topic 3-12: In Development
+- ✅ Topics 1–12: Complete (see list above)
 
 ## 🎯 Interview Preparation
 
@@ -346,9 +337,9 @@ This project is for educational purposes.
 
 ## 🎯 Project Status
 
-**Current Status**: ✅ Topics 1-2 Complete | 🚧 Topics 3-12 In Development
+**Current Status**: ✅ Topics 1–12 Complete
 
-**Last Updated**: January 2025
+**Last Updated**: February 2026
 
 **Repository**: [GitHub - Real-Time IoT Data Engineering Pipeline](https://github.com/shiva1137/real-time-iot-data-engineering-pipeline)
 
@@ -358,7 +349,7 @@ This project is for educational purposes.
 
 This project is part of a structured learning path to master data engineering concepts through hands-on implementation. Each topic builds upon the previous one, creating a complete, production-ready pipeline.
 
-**Key Achievements So Far:**
+**Key Achievements:**
 - ✅ Production-grade project structure
 - ✅ Docker infrastructure setup
 - ✅ Comprehensive architecture documentation
@@ -366,10 +357,8 @@ This project is part of a structured learning path to master data engineering co
 - ✅ India-based data generator with comprehensive quality issues
 - ✅ Idempotent Kafka producer with error handling
 - ✅ Validation consumer with DLQ pattern
+- ✅ Spark Streaming and batch jobs, dbt marts, FastAPI, Airflow DAGs
 - ✅ Interview-ready explanations and Q&A
 
-**Next Milestones:**
-- 🎯 Topic 3: Build Spark Streaming pipeline (consumes from validated_iot_data)
-- 🎯 Topic 4: Create batch processing jobs
-- 🎯 Topic 5: Enhanced data quality validation
+**Future Enhancements:** Scale to 1M+ events/day, add API integration tests, expand dbt tests.
 

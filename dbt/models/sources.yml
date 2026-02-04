@@ -1,0 +1,11 @@
+# Sources: raw tables in PostgreSQL (public schema)
+# Batch job writes processed_daily to public
+version: 2
+sources:
+  - name: raw
+    description: Raw / batch output tables in public schema
+    schema: public
+    database: "{{ target.dbname }}"
+    tables:
+      - name: processed_daily
+        description: Daily/hourly processed IoT readings from Spark batch job

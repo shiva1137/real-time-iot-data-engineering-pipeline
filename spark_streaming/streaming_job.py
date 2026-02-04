@@ -47,7 +47,7 @@ from pyspark.sql.functions import (
 from pyspark.sql.types import (
     StructType, StructField, StringType, DoubleType, IntegerType, TimestampType, LongType
 )
-from pyspark.sql.streaming import StreamingQuery, StreamingQueryListener
+from pyspark.sql.streaming import StreamingQuery, StreamingQueryListener, Trigger
 from pymongo import MongoClient, UpdateOne
 from pymongo.errors import PyMongoError, ConnectionFailure, ServerSelectionTimeoutError
 from tenacity import (
@@ -733,7 +733,7 @@ def start_streaming_query(spark: SparkSession) -> StreamingQuery:
     query = aggregated_df \
         .writeStream \
         .outputMode("update") \
-        .trigger(processingTime=MICRO_BATCH_INTERVAL) \
+        .trigger(Trigger.processingTime(MICRO_BATCH_INTERVAL)) \
         .foreachBatch(write_to_mongodb_batch) \
         .option("checkpointLocation", CHECKPOINT_LOCATION) \
         .start()

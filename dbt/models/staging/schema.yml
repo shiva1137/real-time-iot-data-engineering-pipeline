@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: stg_iot_readings
+    description: Staging IoT readings from processed_daily
+    columns:
+      - name: sensor_id
+        description: Sensor identifier
+        tests: [not_null]
+      - name: reading_date
+        description: Date of reading
+        tests: [not_null]
+      - name: hour
+        description: Hour of day (0-23)
+      - name: avg_temperature
+        description: Average temperature in window
+        tests: [not_null]
+      - name: _loaded_at
+        description: Load timestamp
