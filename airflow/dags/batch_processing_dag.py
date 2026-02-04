@@ -4,6 +4,9 @@ DAG 2: Batch Processing (Topic 8)
 Schedule: Daily at 02:00 AM.
 Tasks: wait_for_data, run_spark_batch, validate_output, update_freshness.
 Retry: 1 time, 30 min interval.
+
+AWS: On MWAA, use Airflow Variables for POSTGRES_* and replace run_spark_batch
+with GlueJobOperator to run the same job on AWS Glue. See airflow/dags/README_AWS_MWAA.md.
 """
 
 from datetime import datetime, timedelta

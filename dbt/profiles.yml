@@ -1,6 +1,8 @@
 # dbt Profiles Configuration
 # This file should be in ~/.dbt/profiles.yml or project-specific location
 # DO NOT commit actual credentials to version control
+#
+# AWS: Use target 'prod' with POSTGRES_* env (RDS) or target 'redshift' for Redshift.
 
 iot_data_pipeline:
   target: dev
@@ -25,4 +27,27 @@ iot_data_pipeline:
       dbname: "{{ env_var('POSTGRES_DATABASE') }}"
       schema: analytics
       threads: 8
+
+    # Amazon RDS for PostgreSQL (same as prod; use when deploying on AWS)
+    rds:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST') }}"
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      port: "{{ env_var('POSTGRES_PORT') | as_number }}"
+      dbname: "{{ env_var('POSTGRES_DATABASE') }}"
+      schema: analytics
+      threads: 8
+
+    # Amazon Redshift (optional analytics warehouse)
+    redshift:
+      type: redshift
+      host: "{{ env_var('REDSHIFT_HOST', '') }}"
+      port: "{{ env_var('REDSHIFT_PORT', '5439') | as_number }}"
+      user: "{{ env_var('REDSHIFT_USER') }}"
+      password: "{{ env_var('REDSHIFT_PASSWORD') }}"
+      dbname: "{{ env_var('REDSHIFT_DATABASE') }}"
+      schema: analytics
+      threads: 8
+      keepalive_idle: 0
 

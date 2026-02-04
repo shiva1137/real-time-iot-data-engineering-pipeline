@@ -1,6 +1,6 @@
 # Real-Time IoT Data Engineering Pipeline: Streaming Data Processing & Analytics
 
-A production-grade, interview-ready real-time data pipeline for IoT sensor data processing. This project demonstrates end-to-end data engineering practices from ingestion to serving analytics via REST API.
+A production-grade, **AWS-ready** real-time data pipeline for IoT sensor data processing. Built for **2026 India AWS Data Engineer** roles: run locally with Docker or deploy on **Amazon MSK, S3, Glue, EMR, RDS, and MWAA**. Demonstrates end-to-end data engineering with clear AWS service mapping and resume-ready bullet points.
 
 ## 📊 Project Overview
 
@@ -226,6 +226,7 @@ See [docs/topic2_usage_guide.md](docs/topic2_usage_guide.md) for detailed usage 
 
 ## 🔧 Technology Stack
 
+**Local / Docker (default):**
 - **Message Queue**: Apache Kafka (KRaft mode)
 - **Streaming**: Apache Spark Streaming
 - **Batch Processing**: Apache Spark (PySpark)
@@ -235,6 +236,26 @@ See [docs/topic2_usage_guide.md](docs/topic2_usage_guide.md) for detailed usage 
 - **API**: FastAPI
 - **Orchestration**: Apache Airflow
 - **Containerization**: Docker & Docker Compose
+
+**AWS deployment (production):**
+- **Streaming / ingestion**: Amazon MSK (Managed Kafka) or Amazon Kinesis Data Streams
+- **Data lake**: Amazon S3 (raw, processed, checkpoint)
+- **ETL / batch**: AWS Glue (Spark) or Amazon EMR
+- **Databases**: Amazon RDS for PostgreSQL, Amazon DocumentDB (MongoDB-compatible)
+- **Orchestration**: Amazon MWAA (Managed Workflows for Apache Airflow)
+- **API**: Same FastAPI on ECS/EC2/Lambda, reading from RDS
+- **CI/CD**: GitHub Actions → ECR, Glue jobs, MWAA DAGs
+
+## 🎯 AWS Data Engineer – Resume Bullets
+
+Use these for **2026 India AWS Data Engineer** roles:
+
+- **Designed and implemented an AWS-ready IoT data pipeline** processing ~864K sensor readings/day using **Amazon MSK** (Kafka), **S3** (data lake/checkpoints), **AWS Glue / EMR** (Spark streaming & batch), **Amazon RDS (PostgreSQL)** and **Amazon MWAA** (Airflow) for orchestration.
+- **Built real-time and batch ETL** with Spark on **AWS Glue/EMR**: Kafka → Spark Streaming → DocumentDB/RDS; daily batch jobs with S3 landing and **dbt** transformations targeting **Redshift/RDS**.
+- **Orchestrated data workflows** with **Apache Airflow** (MWAA): ingestion validation, batch processing, and dbt runs; configured AWS connections and S3/XCom for production.
+- **Ensured data quality and observability**: validation consumers, DLQ pattern, structured logging; pipeline deployable via **Docker** locally and **AWS** (ECR, Glue, MWAA) for recruiter demos.
+
+See [docs/aws_deployment_guide.md](docs/aws_deployment_guide.md) and [docs/architecture_aws.md](docs/architecture_aws.md) for AWS architecture and deployment steps.
 
 ## 📚 Topics Covered
 
@@ -332,12 +353,13 @@ This project is for educational purposes.
 - Kafka UI: http://localhost:8080
 - FastAPI Docs: http://localhost:8000/docs (when running)
 - Airflow UI: http://localhost:8080/airflow (when running)
+- **AWS**: [Architecture on AWS](docs/architecture_aws.md) · [Deployment guide](docs/aws_deployment_guide.md)
 
 ---
 
 ## 🎯 Project Status
 
-**Current Status**: ✅ Topics 1–12 Complete
+**Current Status**: ✅ Topics 1–12 Complete · ✅ AWS-ready (MSK, S3, Glue, EMR, RDS, MWAA)
 
 **Last Updated**: February 2026
 

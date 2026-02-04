@@ -76,7 +76,11 @@ KAFKA_INPUT_TOPIC = os.getenv("KAFKA_INPUT_TOPIC", "validated_iot_data")
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017/")
 MONGO_DATABASE = os.getenv("MONGO_DATABASE", "iot_data")
 MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "real_time_aggregates")
-CHECKPOINT_LOCATION = os.getenv("CHECKPOINT_LOCATION", "/tmp/spark_streaming_checkpoint")
+# Checkpoint: use S3 path on AWS (e.g. s3://bucket/iot/checkpoints/streaming/) for fault tolerance
+S3_CHECKPOINT_LOCATION = os.getenv("S3_CHECKPOINT_LOCATION", "").strip()
+CHECKPOINT_LOCATION = (
+    S3_CHECKPOINT_LOCATION if S3_CHECKPOINT_LOCATION else os.getenv("CHECKPOINT_LOCATION", "/tmp/spark_streaming_checkpoint")
+)
 WINDOW_DURATION = "5 minutes"
 WATERMARK_DELAY = "1 minute"
 MICRO_BATCH_INTERVAL = "10 seconds"

@@ -1,5 +1,7 @@
 # IoT Data Engineering Project - Architecture Documentation
 
+**AWS deployment:** This pipeline is AWS-ready. For architecture and deployment on **Amazon MSK, S3, Glue, EMR, RDS, and MWAA**, see [architecture_aws.md](architecture_aws.md) and [aws_deployment_guide.md](aws_deployment_guide.md).
+
 ## 📋 Table of Contents
 1. [Architecture Overview](#architecture-overview)
 2. [Folder Structure Explanation](#folder-structure-explanation)

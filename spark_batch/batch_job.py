@@ -43,6 +43,8 @@ POSTGRES_TARGET_TABLE = "processed_daily"
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017/")
 MONGO_DATABASE = os.getenv("MONGO_DATABASE", "iot_data")
 MONGO_COLLECTION = "processed_daily"
+# Optional: S3 path for data lake (AWS). When set, batch output is also written as Parquet to S3.
+S3_BUCKET_PROCESSED = os.getenv("S3_BUCKET_PROCESSED", "").rstrip("/")
 JDBC_URL = f"jdbc:postgresql://{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
 logging.basicConfig(
@@ -173,6 +175,15 @@ def write_to_postgres(df, process_date: str) -> None:
     logger.info("Wrote batch to PostgreSQL %s", POSTGRES_TARGET_TABLE)
 
 
+def write_to_s3(df, process_date: str) -> None:
+    """Write batch result to S3 as Parquet (AWS data lake). Path: s3://bucket/processed/date=YYYY-MM-DD/."""
+    if not S3_BUCKET_PROCESSED:
+        return
+    path = f"{S3_BUCKET_PROCESSED}/date={process_date}/"
+    df.write.mode("overwrite").parquet(path)
+    logger.info("Wrote batch to S3 %s", path)
+
+
 def ensure_processed_daily_table(process_date: str) -> None:
     """Ensure processed_daily table exists in PostgreSQL (idempotent)."""
     try:
@@ -238,6 +249,10 @@ def run_batch(run_date: Optional[str] = None) -> None:
 
         # Write to PostgreSQL (append for date = idempotent per run)
         write_to_postgres(df, process_date)
+
+        # Optional: write to S3 for data lake (AWS Glue/Athena)
+        if S3_BUCKET_PROCESSED:
+            write_to_s3(df, process_date)
 
         # Write to MongoDB via connector if available; else skip (optional per guide)
         try:
